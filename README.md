@@ -1,5 +1,12 @@
 # FastApi
 
+- регистрация / автоматизация
+- загрузка пользователем коротких видео и картинок
+- просмотр видео
+- модерация
+- оценки
+- подписчики
+
 ``` code
 pipenv install fastapi[all]
 ```
@@ -14,4 +21,10 @@ pipenv install python-multipart
 
 ``` code
 uvicorn main:app --reload
+```
+
+## Postgresql
+
+``` code
+pip install ormar[postgresql]
 ```

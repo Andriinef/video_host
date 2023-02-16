@@ -4,8 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-fastapi = {extras = ["all"], version = "0.92.0"}
+fastapi = {extras = ["all"], version = "==0.92.0"}
 python-multipart = "==0.0.5"
+ormar = {extras = ["sqlite"], version = "*"}
 
 [dev-packages]
 black = "~=22.10.0"

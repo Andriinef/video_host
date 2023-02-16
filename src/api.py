@@ -5,6 +5,7 @@ from typing import List
 from fastapi import APIRouter, File, Form, UploadFile
 from fastapi.responses import JSONResponse
 
+from .models import Video
 from .schemas import GetVideo, Message, UploadVideo, User
 
 app_router = APIRouter()
@@ -44,13 +45,15 @@ async def info_set(info: UploadVideo):
     return info
 
 
-@app_router.get(
-    "/info_video", response_model=GetVideo, responses={404: {"model": Message}}
-)
+@app_router.get("/info_video", response_model=GetVideo, responses={404: {"model": Message}})
 async def get_info_video() -> JSONResponse:
     user_up = User(**{"id": 25, "name": "Piter"})
-    video_up = UploadVideo(
-        **{"title": "Test", "description": "Description", "tags": ["qwe", "asd", "zxc"]}
-    )
+    video_up = UploadVideo(**{"title": "Test", "description": "Description", "tags": ["qwe", "asd", "zxc"]})
     info = GetVideo(user=user_up, video=video_up)
     return JSONResponse(status_code=200, content=info.dict())
+
+
+@app_router.post("/video")
+async def create_video(video: Video):
+    await video.save()
+    return video
