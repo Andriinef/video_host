@@ -2,42 +2,52 @@ import os
 import shutil
 from typing import List
 
-from fastapi import APIRouter, File, Form, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, BackgroundTasks, File, Form, UploadFile
+from fastapi.responses import JSONResponse, StreamingResponse
+from starlette.templating import Jinja2Templates
 
-from .models import Video
-from .schemas import GetVideo, Message, UploadVideo, User
+from .models import User, Video
+from .schemas import GetListUserVideo, GetVideo, Message, UploadVideo
+from .services import save_video
 
 app_router = APIRouter()
+templates = Jinja2Templates(directory="templates")
 
 
 @app_router.post("/")
 async def update_video(
+    background_tasks: BackgroundTasks,
     title: str = Form(...),
     description: str = Form(...),
-    tags: List[str] = Form(...),
-    file_video: UploadFile = File(),
-) -> dict:
-    info = UploadVideo(title=title, description=description, tags=tags)
-    # create the uploads folder if it doesn't exist
-    os.makedirs("uploads_video", exist_ok=True)
-    file_path = os.path.join("uploads_video", str(file_video.filename))
-    with open(file_path, "wb") as buffer:
-        shutil.copyfileobj(file_video.file, buffer)
+    file: UploadFile = File(),
+):
+    user = await User.objects.first()
+    return await save_video(user, file, title, description, background_tasks)
 
-    return {"file_name": file_video.filename, "info": info}
+
+@app_router.get("/video/{video_pk}", responses={404: {"model": Message}})
+async def get_video(video_pk: int):
+    file = await Video.objects.select_related("user").get(pk=video_pk)
+    file_like = open(file.file, mode="rb")
+    return StreamingResponse(file_like, media_type="video/mp4")
 
 
 @app_router.post("/img")
 async def update_image(files_image: List[UploadFile] = File()) -> dict:
     # create the uploads folder if it doesn't exist
-    os.makedirs("uploads_image", exist_ok=True)
+    os.makedirs("media/uploads_image", exist_ok=True)
     for image in files_image:
-        file_path = os.path.join("uploads_image", str(image.filename))
+        file_path = os.path.join("media/uploads_image", str(image.filename))
         with open(file_path, "wb") as buffer:
             shutil.copyfileobj(image.file, buffer)
 
     return {"file_name": "Good"}
+
+
+@app_router.get("/user/{user_pk}", response_model=List[GetListUserVideo])
+async def get_list_user_video(user_pk: int):
+    video_list = await Video.objects.filter(user=user_pk).all()
+    return video_list
 
 
 @app_router.post("/info")
@@ -57,3 +67,9 @@ async def get_info_video() -> JSONResponse:
 async def create_video(video: Video):
     await video.save()
     return video
+
+
+@app_router.post("/user")
+async def create_user(user: User):
+    await user.save()
+    return user

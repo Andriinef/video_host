@@ -26,5 +26,5 @@ uvicorn main:app --reload
 ## Postgresql
 
 ``` code
-pip install ormar[postgresql]
+pipenv install ormar[postgresql]
 ```

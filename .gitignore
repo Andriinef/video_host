@@ -60,6 +60,7 @@ coverage.xml
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
+sqlite.db
 
 # Flask stuff:
 instance/
@@ -104,6 +105,7 @@ celerybeat.pid
 # Environments
 .env
 .venv
+.vscode
 env/
 venv/
 ENV/
@@ -124,6 +126,7 @@ venv.bak/
 .mypy_cache/
 .dmypy.json
 dmypy.json
+settings.json
 
 # Pyre type checker
 .pyre/
@@ -131,6 +134,3 @@ dmypy.json
 # video && image
 uploads_image
 uploads_video
-
-# sqlite
-sqlite.db
